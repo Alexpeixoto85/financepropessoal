@@ -1,0 +1,3221 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FinancePro - Controle Financeiro Pessoal</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* Estilos permanecem os mesmos */
+  :root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --accent: #4cc9f0;
+    --success: #2ecc71;
+    --danger: #f72585;
+    --warning: #ff9e00;
+    --dark: #14213d;
+    --light: #f8f9fa;
+    --gray: #adb5bd;
+    --gray-light: #e9ecef;
+    --sidebar: #1d3557;
+    --sidebar-active: #4361ee;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s ease;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--light);
+    color: #333;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  .app-container {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar Moderna */
+  .sidebar {
+    width: 280px;
+    background: var(--sidebar);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    z-index: 10;
+    overflow-y: auto;
+  }
+
+  .sidebar .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    padding: 30px 24px 20px;
+    color: white;
+    background: var(--sidebar);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .logo-icon {
+    background: var(--primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px 0;
+  }
+
+  .sidebar nav button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+    padding: 15px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    border-left: 5px solid transparent;
+    outline: none;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .sidebar nav button i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+  }
+
+  .sidebar nav button.active, 
+  .sidebar nav button:hover {
+    background: rgba(67, 97, 238, 0.15);
+    border-left: 5px solid var(--sidebar-active);
+    color: white;
+  }
+
+  .sidebar .toggle-btn {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: -45px;
+    background: var(--sidebar);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    z-index: 99;
+    transition: var(--transition);
+  }
+
+  .sidebar .toggle-btn:hover {
+    background: var(--primary);
+  }
+
+  /* Conteúdo Principal */
+  .main-content {
+    flex: 1;
+    padding: 30px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    transition: var(--transition);
+    overflow-y: auto;
+    background: var(--light);
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* Alertas */
+  .alert-vencimento {
+    background: rgba(255, 152, 0, 0.15);
+    color: #856404;
+    border-left: 4px solid var(--warning);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition);
+  }
+
+  .alert-vencimento:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .alert-vencimento span {
+    font-size: 1.4em;
+    color: var(--warning);
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    color: var(--dark);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card h2 i {
+    color: var(--primary);
+  }
+
+  /* Cards de Resumo */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .summary-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .summary-card .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+  }
+
+  .summary-card.receita::before {
+    background: var(--success);
+  }
+
+  .summary-card.despesa::before {
+    background: var(--danger);
+  }
+
+  .summary-card.saldo::before {
+    background: var(--primary);
+  }
+
+  .summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .summary-card h3 {
+    font-size: 1rem;
+    color: var(--gray);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .summary-card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .summary-card .trend {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+
+  .trend.up {
+    color: var(--success);
+  }
+
+  .trend.down {
+    color: var(--danger);
+  }
+
+  .receita .value { color: var(--success); }
+  .despesa .value { color: var(--danger); }
+  .saldo .value { color: var(--primary); }
+
+  .forecast {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-top: 5px;
+  }
+
+  /* Gráficos */
+  .chart-container {
+    width: 100%;
+    height: 320px;
+    margin: 0 auto;
+  }
+
+  /* Abas */
+  .tab-content { 
+    display: none; 
+    animation: fadeIn 0.4s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .tab-content.active { 
+    display: block; 
+  }
+
+  /* Botões */
+  .btn {
+    padding: 12px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+
+  .btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .btn-xs {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .btn-success { background: var(--success); }
+  .btn-success:hover { background: #27ae60; }
+
+  .btn-danger { background: var(--danger); }
+  .btn-danger:hover { background: #e91e63; }
+
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-warning:hover { background: #ff8c00; }
+
+  .btn-secondary { 
+    background: var(--gray); 
+    color: white;
+  }
+  .btn-secondary:hover { background: #5a6268; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-outline:hover {
+    background: rgba(67, 97, 238, 0.1);
+  }
+
+  /* Formulários */
+  .form-group { 
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  label { 
+    display: block; 
+    font-weight: 500; 
+    margin-bottom: 8px;
+    color: var(--dark);
+  }
+
+  input, select, textarea {
+    width: 100%; 
+    padding: 14px 16px; 
+    border: 1px solid var(--gray-light);
+    border-radius: 10px; 
+    font-size: 1rem; 
+    background: white;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  }
+
+  /* Tabelas */
+  table {
+    width: 100%; 
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  th, td {
+    padding: 14px 16px; 
+    text-align: left; 
+    border-bottom: 1px solid var(--gray-light);
+    vertical-align: middle;
+  }
+
+  th { 
+    background: var(--primary);
+    color: white;
+    font-weight: 500;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: rgba(67, 97, 238, 0.03);
+  }
+
+  .positive { color: var(--success); font-weight: 600; }
+  .negative { color: var(--danger); font-weight: 600; }
+
+  /* Filtros */
+  .filters {
+    display: flex; 
+    gap: 16px; 
+    flex-wrap: wrap; 
+    margin-bottom: 20px;
+    align-items: flex-end;
+    background: rgba(233, 236, 239, 0.5);
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .filters .form-group { 
+    margin-bottom: 0; 
+    flex: 1 1 220px;
+  }
+
+  /* Barra de progresso */
+  .progress-bar {
+    height: 24px; 
+    background: var(--gray-light); 
+    border-radius: 12px; 
+    overflow: hidden; 
+    margin: 12px 0;
+  }
+
+  .progress {
+    height: 100%; 
+    background: var(--primary); 
+    border-radius: 12px; 
+    text-align: center;
+    color: white; 
+    font-size: 0.9rem; 
+    line-height: 24px; 
+    transition: width .4s ease;
+    font-weight: 500;
+  }
+
+  /* Badges */
+  .category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(67, 97, 238, 0.1);
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .add-category-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+    transition: var(--transition);
+  }
+
+  .add-category-btn:hover {
+    transform: scale(1.1);
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background-color: var(--card-bg);
+    margin: auto;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: var(--shadow-hover);
+    position: relative;
+    animation: slideUp 0.4s ease;
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .close-button {
+    color: var(--gray);
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .close-button:hover {
+    color: var(--danger);
+    transform: rotate(90deg);
+  }
+
+  .modal h2 {
+    margin-top: 0;
+    color: var(--primary);
+    padding-right: 30px;
+  }
+
+  .modal .btn-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+  }
+
+  /* Calculator Styles */
+  .calculator-trigger {
+    cursor: pointer;
+    color: var(--primary);
+    margin-left: 8px;
+    transition: var(--transition);
+    display: inline-block;
+  }
+  .calculator-trigger:hover {
+    color: var(--primary-light);
+    transform: scale(1.1);
+  }
+  #calculator {
+    margin-top: 20px;
+  }
+  .calculator-display input {
+    width: 100%;
+    height: 50px;
+    text-align: right;
+    font-size: 1.8rem;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: var(--gray-light);
+    border: none;
+  }
+  .calculator-keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .calculator-keys button {
+    padding: 18px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: var(--gray-light);
+    transition: var(--transition);
+  }
+  .calculator-keys button:hover {
+    background: var(--gray);
+    color: white;
+  }
+  .calculator-keys button.operator {
+    background: var(--warning);
+    color: white;
+  }
+  .calculator-keys button.operator:hover {
+    background: #ff8c00;
+  }
+  .calculator-keys button.equal-sign {
+    background: var(--success);
+    color: white;
+  }
+  .calculator-keys button.equal-sign:hover {
+    background: #27ae60;
+  }
+  .calculator-keys button.clear {
+    background: var(--danger);
+    color: white;
+  }
+  .calculator-keys button.clear:hover {
+    background: #e91e63;
+  }
+
+
+  /* Responsividade */
+  @media (max-width: 1200px) {
+    .main-content { padding: 24px 5%; }
+  }
+
+  @media (max-width: 992px) {
+    .sidebar { width: 80px; }
+    .sidebar .logo span { display: none; }
+    .sidebar .logo { justify-content: center; padding: 20px 10px; }
+    .sidebar nav button span { display: none; }
+    .sidebar nav button { justify-content: center; padding: 15px 10px; }
+    .sidebar nav button i { font-size: 1.4rem; }
+    .sidebar .toggle-btn { display: block; }
+  }
+
+  @media (max-width: 768px) {
+    .app-container { flex-direction: column; }
+    .sidebar { 
+      flex-direction: row; 
+      width: 100%; 
+      height: 70px; 
+      position: fixed; 
+      top: 0; 
+      left: 0;
+      z-index: 100;
+    }
+    .sidebar .logo { display: none; }
+    .sidebar nav { flex-direction: row; gap: 0; padding: 0; }
+    .sidebar nav button { 
+      flex: 1; 
+      text-align: center; 
+      border-left: none; 
+      border-bottom: 3px solid transparent;
+      justify-content: center;
+      padding: 12px 5px;
+    }
+    .sidebar nav button.active, 
+    .sidebar nav button:hover { 
+      border-bottom: 3px solid var(--sidebar-active);
+      background: rgba(67, 97, 238, 0.15);
+    }
+    .sidebar .toggle-btn { display: none; }
+    .main-content { padding-top: 90px; }
+  }
+
+  @media (max-width: 576px) {
+    .main-content { padding: 10px 4%; padding-top: 80px; }
+    .summary-cards { gap: 12px; }
+    .summary-card { min-width: 100%; }
+    .filters .form-group { flex: 1 1 100%; }
+    .action-buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+    .action-buttons .btn {
+      width: 100%;
+    }
+    td .btn {
+        margin-bottom: 5px;
+    }
+    .calculator-keys button.equal-sign {
+        grid-column: span 4;
+    }
+  }
+
+  @media print {
+    body, html { background: #fff !important; }
+    .sidebar, .btn, .filters, .toggle-btn, .modal, .main-content > :not(.tab-content.active) { display: none !important;}
+    .main-content { padding: 0 !important; }
+    .tab-content.active { display: block !important; }
+    .card { box-shadow: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app-container">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <span>FinancePro</span>
+    </div>
+    <nav>
+      <button class="active" data-tab="dashboard">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </button>
+      <button data-tab="transacoes">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Transações</span>
+      </button>
+      <button data-tab="contas">
+        <i class="fas fa-piggy-bank"></i>
+        <span>Contas</span>
+      </button>
+      <button data-tab="metas">
+        <i class="fas fa-bullseye"></i>
+        <span>Metas</span>
+      </button>
+      <button data-tab="cartoes">
+        <i class="fas fa-credit-card"></i>
+        <span>Cartões</span>
+      </button>
+      <button data-tab="relatorios">
+        <i class="fas fa-chart-bar"></i>
+        <span>Relatórios</span>
+      </button>
+      <button data-tab="backup">
+        <i class="fas fa-database"></i>
+        <span>Backup</span>
+      </button>
+    </nav>
+    <button class="toggle-btn" id="sidebar-toggle" type="button">
+      <i class="fas fa-bars"></i>
+    </button>
+  </aside>
+  
+  <main class="main-content">
+    <div id="alert-vencimento"></div>
+    
+    <div class="tab-content active" id="dashboard-content">
+      <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> Dashboard Financeiro</h1>
+        <div class="action-buttons">
+          <button class="btn btn-outline" id="refresh-btn">
+            <i class="fas fa-sync-alt"></i> Atualizar
+          </button>
+          <button class="btn btn-secondary">
+            <i class="fas fa-download"></i> Exportar
+          </button>
+        </div>
+      </div>
+      
+      <div class="summary-cards">
+        <div class="summary-card receita">
+            <div class="card-header">
+                <h3>Receitas</h3>
+                <button class="btn btn-success btn-xs" id="add-receita-btn"><i class="fas fa-plus"></i> Nova</button>
+            </div>
+          <div class="value receita" id="total-receitas">R$ 0,00</div>
+          <div class="forecast" id="receita-forecast"></div>
+          <div class="trend up">
+            <i class="fas fa-arrow-up"></i> 12% em relação ao mês anterior
+          </div>
+        </div>
+        <div class="summary-card despesa">
+            <div class="card-header">
+                <h3>Despesas</h3>
+                <button class="btn btn-danger btn-xs" id="add-despesa-btn"><i class="fas fa-plus"></i> Nova</button>
+            </div>
+          <div class="value despesa" id="total-despesas">R$ 0,00</div>
+          <div class="forecast" id="despesa-forecast"></div>
+          <div class="trend down">
+            <i class="fas fa-arrow-down"></i> 8% em relação ao mês anterior
+          </div>
+        </div>
+        <div class="summary-card saldo">
+          <h3>Saldo Total</h3>
+          <div class="value saldo" id="saldo-total">R$ 0,00</div>
+          <div class="forecast" id="saldo-forecast"></div>
+          <div class="trend up">
+            <i class="fas fa-arrow-up"></i> 5% em relação ao mês anterior
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2><i class="fas fa-chart-pie"></i> Visão Geral</h2>
+        <div class="chart-container">
+          <canvas id="overview-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="page-header" style="margin-bottom: 15px;">
+          <h2><i class="fas fa-history"></i> Últimas Transações</h2>
+          <button class="btn btn-sm" id="new-transaction-btn">
+            <i class="fas fa-plus"></i> Nova Transação
+          </button>
+        </div>
+        <table id="recent-transactions">
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Data</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="transacoes-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-list"></i> Histórico de Transações</h2>
+        <div class="filters">
+          <div class="form-group">
+            <label for="filter-period">Período</label>
+            <select id="filter-period">
+              <option value="all">Todos</option>
+              <option value="current_month">Este Mês</option>
+              <option value="current_year">Este Ano</option>
+              <option value="past_months">Meses Anteriores</option>
+              <option value="future_months">Meses Futuros</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group" id="custom-dates" style="display:none;">
+            <label for="start-date">Data Inicial</label>
+            <input type="date" id="start-date" />
+            <label for="end-date">Data Final</label>
+            <input type="date" id="end-date" />
+          </div>
+          <div class="form-group">
+            <label for="filter-category">Categoria</label>
+            <input type="text" id="filter-category" list="categories-list" />
+          </div>
+          <div class="form-group">
+            <label for="filter-type">Tipo</label>
+            <select id="filter-type">
+              <option value="all">Todos</option>
+              <option value="receita">Receita</option>
+              <option value="despesa">Despesa</option>
+              <option value="transferencia">Transferência</option>
+              <option value="transferencia-meta">Transferência para Meta</option>
+              <option value="compra-cartao">Compra no Cartão</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" id="clear-filters">Limpar Filtros</button>
+        </div>
+        <table id="all-transactions">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Recorrência</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="contas-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-plus-circle"></i> Adicionar Nova Conta</h2>
+        <form id="account-form">
+          <div class="form-group">
+            <label for="account-name">Nome da Conta</label>
+            <input type="text" id="account-name" required />
+          </div>
+          <div class="form-group">
+            <label for="account-type">Tipo de Conta</label>
+            <select id="account-type" required>
+              <option value="corrente">Conta Corrente</option>
+              <option value="poupanca">Poupança</option>
+              <option value="investimento">Investimento</option>
+              <option value="carteira">Carteira</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="account-balance">Saldo Inicial (R$)</label>
+            <input type="number" id="account-balance" step="0.01" value="0" required />
+          </div>
+          <button type="submit" class="btn">Criar Conta</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-list"></i> Minhas Contas</h2>
+        <table id="accounts-list">
+          <thead>
+            <tr>
+              <th>Conta</th>
+              <th>Tipo</th>
+              <th>Saldo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="metas-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-plus-circle"></i> Adicionar Nova Meta</h2>
+        <form id="goal-form">
+          <div class="form-group">
+            <label for="goal-name">Nome da Meta</label>
+            <input type="text" id="goal-name" required />
+          </div>
+          <div class="form-group">
+            <label for="goal-amount">Valor Objetivo (R$)</label>
+            <input type="number" id="goal-amount" step="0.01" min="1" required />
+          </div>
+          <div class="form-group">
+            <label for="goal-date">Data Limite</label>
+            <input type="date" id="goal-date" required />
+          </div>
+          <button type="submit" class="btn">Adicionar Meta</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-bullseye"></i> Minhas Metas</h2>
+        <div id="goals-list"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="cartoes-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-plus-circle"></i> Adicionar Cartão de Crédito</h2>
+        <form id="creditcard-form">
+          <div class="form-group">
+            <label for="cc-name">Nome do Cartão</label>
+            <input type="text" id="cc-name" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-limit">Limite Total (R$)</label>
+            <input type="number" id="cc-limit" step="0.01" min="0" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-closing">Dia de Fechamento</label>
+            <input type="number" id="cc-closing" min="1" max="31" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-due">Dia de Vencimento</label>
+            <input type="number" id="cc-due" min="1" max="31" required />
+          </div>
+          <button type="submit" class="btn">Adicionar Cartão</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-credit-card"></i> Meus Cartões</h2>
+        <table id="creditcards-list">
+          <thead>
+            <tr>
+              <th>Cartão</th>
+              <th>Limite</th>
+              <th>Disponível</th>
+              <th>Fatura Atual</th>
+              <th>Melhor Dia para Comprar</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-shopping-cart"></i> Registrar Compra no Cartão</h2>
+        <form id="cc-purchase-form">
+          <div class="form-group">
+            <label for="cc-purchase-card">Cartão</label>
+            <select id="cc-purchase-card" required></select>
+          </div>
+          <div class="form-group">
+            <label for="cc-purchase-desc">Descrição</label>
+            <input type="text" id="cc-purchase-desc" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-purchase-value">Valor (R$)</label>
+            <input type="number" id="cc-purchase-value" step="0.01" min="0.01" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-purchase-date">Data da Compra</label>
+            <input type="date" id="cc-purchase-date" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-purchase-installments">Parcelas</label>
+            <input type="number" id="cc-purchase-installments" min="1" max="36" value="1" required />
+          </div>
+          <div class="form-group">
+            <label for="cc-purchase-category">Categoria</label>
+            <input type="text" id="cc-purchase-category" list="categories-list" required />
+          </div>
+          <button type="submit" class="btn">Registrar Compra</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-receipt"></i> Compras e Faturas</h2>
+        <div id="cc-purchases-list"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="relatorios-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-chart-bar"></i> Relatório Mensal</h2>
+        <div class="chart-container">
+          <canvas id="monthly-report-chart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-chart-line"></i> Relatório Anual</h2>
+        <div class="chart-container">
+          <canvas id="annual-report-chart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-chart-pie"></i> Relatório por Categoria</h2>
+        <div class="chart-container">
+          <canvas id="category-report-chart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-crystal-ball"></i> Previsão Financeira</h2>
+        <div class="form-group">
+          <label for="forecast-months">Meses para Previsão</label>
+          <input type="number" id="forecast-months" min="1" max="12" value="6" />
+        </div>
+        <div class="chart-container">
+          <canvas id="forecast-chart"></canvas>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <button class="btn btn-secondary" type="button" onclick="window.print()">
+          <i class="fas fa-print"></i> Imprimir Relatório
+        </button>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="backup-content">
+      <div class="card">
+        <h2 style="margin-bottom:18px;"><i class="fas fa-database"></i> Backup de Dados</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:20px;">
+          <div style="flex:1; min-width:220px;">
+            <h3><i class="fas fa-file-export"></i> Exportar Backup</h3>
+            <p>Salve todos os seus dados em um arquivo JSON para restaurar depois.</p>
+            <button class="btn btn-success" type="button" id="export-backup-btn">
+              <i class="fas fa-download"></i> Exportar Backup
+            </button>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <h3><i class="fas fa-file-import"></i> Importar Backup</h3>
+            <p>Restaure os dados de um backup salvo anteriormente (JSON).</p>
+            <input type="file" id="import-backup-input" accept=".json" style="margin-bottom:10px;" />
+            <button class="btn" type="button" id="import-backup-btn">
+              <i class="fas fa-upload"></i> Importar Backup
+            </button>
+          </div>
+        </div>
+        <div id="backup-message" style="margin-top:20px;color:var(--primary);font-weight:500;"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="transaction-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-transaction-modal">&times;</span>
+      <h2><i class="fas fa-exchange-alt"></i> Nova Transação</h2>
+      <form id="transaction-form">
+        <div class="form-group">
+          <label for="transaction-type">Tipo</label>
+          <select id="transaction-type" required>
+            <option value="">Selecione...</option>
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
+            <option value="transferencia">Transferência</option>
+            <option value="transferencia-meta">Transferência para Meta</option>
+            <option value="compra-cartao">Compra no Cartão</option>
+          </select>
+        </div>
+        <div class="form-group" id="from-account-group" style="display:none;">
+          <label for="from-account">Conta de Origem</label>
+          <select id="from-account"></select>
+        </div>
+        <div class="form-group" id="to-account-group">
+          <label for="to-account">Conta</label>
+          <select id="to-account" required></select>
+        </div>
+        <div class="form-group" id="meta-group" style="display:none;">
+          <label for="meta-select">Meta</label>
+          <select id="meta-select"></select>
+        </div>
+        <div class="form-group" id="cartao-group" style="display:none;">
+          <label for="cartao-select">Cartão de Crédito</label>
+          <select id="cartao-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="transaction-category">Categoria 
+            <button type="button" class="add-category-btn" id="add-category-btn">+</button>
+          </label>
+          <input type="text" id="transaction-category" list="categories-list" required />
+          <datalist id="categories-list"></datalist>
+        </div>
+        <div class="form-group">
+          <label for="transaction-amount">Valor (R$)
+            <span class="calculator-trigger" data-target="transaction-amount"><i class="fas fa-calculator"></i></span>
+          </label>
+          <input type="number" id="transaction-amount" step="0.01" min="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="transaction-date">Data</label>
+          <input type="date" id="transaction-date" required />
+        </div>
+        <div class="form-group">
+          <label for="transaction-description">Descrição</label>
+          <input type="text" id="transaction-description" required />
+        </div>
+        <div class="form-group" id="recorrente-group" style="display:none;">
+          <label><input type="checkbox" id="is-fixa" /> Fixa Mensal</label>
+          <label><input type="checkbox" id="is-recorrente" /> Recorrente</label>
+          <div id="recorrente-extra" style="display:none; margin-top:10px;">
+            <label for="recorrente-interval">Intervalo (meses)</label>
+            <input type="number" id="recorrente-interval" min="1" value="1" />
+          </div>
+          <label><input type="checkbox" id="is-parcelada" /> Parcelada</label>
+          <div id="parcelada-extra" style="display:none; margin-top:10px;">
+            <label for="parcelas-num">Qtd. Parcelas</label>
+            <input type="number" id="parcelas-num" min="2" max="36" value="2" />
+          </div>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-secondary" id="cancel-transaction">Cancelar</button>
+          <button type="submit" class="btn">Adicionar Transação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="category-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-category-modal">&times;</span>
+      <h2><i class="fas fa-tag"></i> Adicionar Nova Categoria</h2>
+      <form id="new-category-form">
+        <div class="form-group">
+          <label for="new-category-name">Nome da Categoria</label>
+          <input type="text" id="new-category-name" required />
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-secondary" id="cancel-category">Cancelar</button>
+          <button type="submit" class="btn">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="saldo-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-saldo-modal">&times;</span>
+      <h2><i class="fas fa-coins"></i> Saldo nas Contas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Conta</th>
+            <th>Tipo</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="saldo-modal-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="edit-transaction-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2><i class="fas fa-edit"></i> Editar Transação</h2>
+      <form id="edit-transaction-form">
+        <input type="hidden" id="edit-transaction-id">
+        <div class="form-group">
+          <label for="edit-transaction-type">Tipo</label>
+          <select id="edit-transaction-type" required>
+            <option value="">Selecione...</option>
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
+            <option value="transferencia">Transferência</option>
+            <option value="transferencia-meta">Transferência para Meta</option>
+            <option value="compra-cartao">Compra no Cartão</option>
+          </select>
+        </div>
+        <div class="form-group" id="edit-from-account-group">
+          <label for="edit-from-account">Conta de Origem</label>
+          <select id="edit-from-account"></select>
+        </div>
+        <div class="form-group" id="edit-to-account-group">
+          <label for="edit-to-account">Conta</label>
+          <select id="edit-to-account"></select>
+        </div>
+        <div class="form-group" id="edit-meta-group">
+          <label for="edit-meta-select">Meta</label>
+          <select id="edit-meta-select"></select>
+        </div>
+        <div class="form-group" id="edit-cartao-group">
+          <label for="edit-cartao-select">Cartão de Crédito</label>
+          <select id="edit-cartao-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="edit-transaction-category">Categoria</label>
+          <input type="text" id="edit-transaction-category" list="categories-list" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-transaction-amount">Valor (R$)
+             <span class="calculator-trigger" data-target="edit-transaction-amount"><i class="fas fa-calculator"></i></span>
+          </label>
+          <input type="number" id="edit-transaction-amount" step="0.01" min="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-transaction-date">Data</label>
+          <input type="date" id="edit-transaction-date" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-transaction-description">Descrição</label>
+          <input type="text" id="edit-transaction-description" required />
+        </div>
+        <div class="form-group" id="edit-recorrente-group">
+            <label><input type="checkbox" id="edit-is-fixa" /> Fixa Mensal</label>
+            <label><input type="checkbox" id="edit-is-recorrente" /> Recorrente</label>
+            <div id="edit-recorrente-extra" style="display:none; margin-top:10px;">
+              <label for="edit-recorrente-interval">Intervalo (meses)</label>
+              <input type="number" id="edit-recorrente-interval" min="1" value="1" />
+            </div>
+            <label><input type="checkbox" id="edit-is-parcelada" /> Parcelada</label>
+            <div id="edit-parcelada-extra" style="display:none; margin-top:10px;">
+              <label for="edit-parcelas-num">Qtd. Parcelas</label>
+              <input type="number" id="edit-parcelas-num" min="2" max="36" value="2" />
+            </div>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-secondary" id="cancel-edit-transaction">Cancelar</button>
+          <button type="submit" class="btn">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-account-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2><i class="fas fa-edit"></i> Editar Conta</h2>
+      <form id="edit-account-form">
+        <input type="hidden" id="edit-account-id">
+        <div class="form-group">
+          <label for="edit-account-name">Nome da Conta</label>
+          <input type="text" id="edit-account-name" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-account-type">Tipo de Conta</label>
+          <select id="edit-account-type" required>
+            <option value="corrente">Conta Corrente</option>
+            <option value="poupanca">Poupança</option>
+            <option value="investimento">Investimento</option>
+            <option value="carteira">Carteira</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-secondary" id="cancel-edit-account">Cancelar</button>
+          <button type="submit" class="btn">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-goal-modal" class="modal">
+      <div class="modal-content">
+          <span class="close-button">&times;</span>
+          <h2><i class="fas fa-edit"></i> Editar Meta</h2>
+          <form id="edit-goal-form">
+              <input type="hidden" id="edit-goal-id">
+              <div class="form-group">
+                  <label for="edit-goal-name">Nome da Meta</label>
+                  <input type="text" id="edit-goal-name" required />
+              </div>
+              <div class="form-group">
+                  <label for="edit-goal-amount">Valor Objetivo (R$)</label>
+                  <input type="number" id="edit-goal-amount" step="0.01" min="1" required />
+              </div>
+              <div class="form-group">
+                  <label for="edit-goal-date">Data Limite</label>
+                  <input type="date" id="edit-goal-date" required />
+              </div>
+              <div class="btn-container">
+                  <button type="button" class="btn btn-secondary" id="cancel-edit-goal">Cancelar</button>
+                  <button type="submit" class="btn">Salvar Alterações</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <div id="adjust-balance-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="adjust-balance-title">Ajustar Saldo</h2>
+            <form id="adjust-balance-form">
+                <input type="hidden" id="adjust-account-id">
+                <p>Saldo Atual: <strong id="current-balance-text"></strong></p>
+                <div class="form-group">
+                    <label for="new-balance-amount">Novo Saldo (R$)</label>
+                    <input type="number" id="new-balance-amount" step="0.01" required />
+                </div>
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" id="cancel-adjust-balance">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar Ajuste</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+  <div id="calculator-modal" class="modal">
+    <div class="modal-content" style="max-width: 320px;">
+      <span class="close-button">&times;</span>
+      <h2><i class="fas fa-calculator"></i> Calculadora</h2>
+      <div id="calculator">
+        <div class="calculator-display">
+          <input type="text" id="calculator-screen" readonly>
+        </div>
+        <div class="calculator-keys">
+          </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+<script>
+  // Dados
+  let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+  let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  let goals = JSON.parse(localStorage.getItem('goals')) || [];
+  let creditcards = JSON.parse(localStorage.getItem('creditcards')) || [];
+  let ccpurchases = JSON.parse(localStorage.getItem('ccpurchases')) || [];
+  let categories = JSON.parse(localStorage.getItem('categories')) || [
+    'Salário', 'Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Outros', 'Ajuste'
+  ];
+
+  // DOM
+  const transactionType = document.getElementById('transaction-type');
+  const fromAccountGroup = document.getElementById('from-account-group');
+  const fromAccount = document.getElementById('from-account');
+  const toAccountGroup = document.getElementById('to-account-group');
+  const toAccount = document.getElementById('to-account');
+  const metaGroup = document.getElementById('meta-group');
+  const metaSelect = document.getElementById('meta-select');
+  const cartaoGroup = document.getElementById('cartao-group');
+  const cartaoSelect = document.getElementById('cartao-select');
+  const transactionForm = document.getElementById('transaction-form');
+  const accountForm = document.getElementById('account-form');
+  const goalForm = document.getElementById('goal-form');
+  const filterPeriod = document.getElementById('filter-period');
+  const customDates = document.getElementById('custom-dates');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const backupMessage = document.getElementById('backup-message');
+  const addCategoryBtn = document.getElementById('add-category-btn');
+  const categoryModal = document.getElementById('category-modal');
+  const saldoModal = document.getElementById('saldo-modal');
+  const filterCategory = document.getElementById('filter-category');
+  const filterType = document.getElementById('filter-type');
+  const clearFiltersBtn = document.getElementById('clear-filters');
+  const refreshBtn = document.getElementById('refresh-btn');
+  const newTransactionBtn = document.getElementById('new-transaction-btn');
+  const transactionModal = document.getElementById('transaction-modal');
+  const closeTransactionModal = document.getElementById('close-transaction-modal');
+  const cancelTransactionBtn = document.getElementById('cancel-transaction');
+  const addReceitaBtn = document.getElementById('add-receita-btn');
+  const addDespesaBtn = document.getElementById('add-despesa-btn');
+
+  // Recorrência
+  const recorrenteGroup = document.getElementById('recorrente-group');
+  const isFixa = document.getElementById('is-fixa');
+  const isRecorrente = document.getElementById('is-recorrente');
+  const isParcelada = document.getElementById('is-parcelada');
+  const recorrenteExtra = document.getElementById('recorrente-extra');
+  const parceladaExtra = document.getElementById('parcelada-extra');
+  const transactionCategory = document.getElementById('transaction-category');
+
+  // Cartão
+  const ccForm = document.getElementById('creditcard-form');
+  const ccList = document.getElementById('creditcards-list');
+  const ccPurchaseForm = document.getElementById('cc-purchase-form');
+  const ccPurchaseCard = document.getElementById('cc-purchase-card');
+  const ccPurchaseCategory = document.getElementById('cc-purchase-category');
+  const ccPurchasesList = document.getElementById('cc-purchases-list');
+
+  // Modal de Edição de Transação
+  const editModal = document.getElementById('edit-transaction-modal');
+  const cancelEditButton = document.getElementById('cancel-edit-transaction');
+  const editTransactionForm = document.getElementById('edit-transaction-form');
+  const editTransactionId = document.getElementById('edit-transaction-id');
+  const editTransactionType = document.getElementById('edit-transaction-type');
+  const editFromAccountGroup = document.getElementById('edit-from-account-group');
+  const editFromAccount = document.getElementById('edit-from-account');
+  const editToAccountGroup = document.getElementById('edit-to-account-group');
+  const editToAccount = document.getElementById('edit-to-account');
+  const editMetaGroup = document.getElementById('edit-meta-group');
+  const editMetaSelect = document.getElementById('edit-meta-select');
+  const editCartaoGroup = document.getElementById('edit-cartao-group');
+  const editCartaoSelect = document.getElementById('edit-cartao-select');
+  const editTransactionCategory = document.getElementById('edit-transaction-category');
+  const editTransactionAmount = document.getElementById('edit-transaction-amount');
+  const editTransactionDate = document.getElementById('edit-transaction-date');
+  const editTransactionDescription = document.getElementById('edit-transaction-description');
+  const editRecorrenteGroup = document.getElementById('edit-recorrente-group');
+  const editIsFixa = document.getElementById('edit-is-fixa');
+  const editIsRecorrente = document.getElementById('edit-is-recorrente');
+  const editIsParcelada = document.getElementById('edit-is-parcelada');
+  const editRecorrenteExtra = document.getElementById('edit-recorrente-extra');
+  const editParceladaExtra = document.getElementById('edit-parcelada-extra');
+  const editRecorrenteInterval = document.getElementById('edit-recorrente-interval');
+  const editParcelasNum = document.getElementById('edit-parcelas-num');
+
+  // Modal de Edição de Conta
+  const editAccountModal = document.getElementById('edit-account-modal');
+  const editAccountForm = document.getElementById('edit-account-form');
+  const editAccountId = document.getElementById('edit-account-id');
+  const editAccountName = document.getElementById('edit-account-name');
+  const editAccountType = document.getElementById('edit-account-type');
+
+  // Modal de Edição de Meta
+  const editGoalModal = document.getElementById('edit-goal-modal');
+  const editGoalForm = document.getElementById('edit-goal-form');
+  const editGoalId = document.getElementById('edit-goal-id');
+  const editGoalName = document.getElementById('edit-goal-name');
+  const editGoalAmount = document.getElementById('edit-goal-amount');
+  const editGoalDate = document.getElementById('edit-goal-date');
+
+  // Modal de Ajuste de Saldo
+  const adjustBalanceModal = document.getElementById('adjust-balance-modal');
+  const adjustBalanceForm = document.getElementById('adjust-balance-form');
+  const adjustAccountId = document.getElementById('adjust-account-id');
+  const adjustBalanceTitle = document.getElementById('adjust-balance-title');
+  const currentBalanceText = document.getElementById('current-balance-text');
+  const newBalanceAmount = document.getElementById('new-balance-amount');
+
+  // Calculator
+  const calculatorModal = document.getElementById('calculator-modal');
+  const calculatorScreen = document.getElementById('calculator-screen');
+  let calculatorTargetInput = null;
+
+  // Charts
+  let overviewChart, monthlyReportChart, annualReportChart, categoryReportChart, forecastChart;
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  function init() {
+    // Definir a data atual para campos de data
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('transaction-date')) document.getElementById('transaction-date').value = today;
+    if (document.getElementById('goal-date')) document.getElementById('goal-date').value = today;
+    if (document.getElementById('cc-purchase-date')) document.getElementById('cc-purchase-date').value = today;
+    
+    // --- Data Migration & Cleaning ---
+    runDataMigration();
+    
+    // Recalcular todos os saldos para garantir consistência após as mudanças
+    recalculateAllBalances();
+
+    // Inicializar componentes
+    initCalculator();
+    setupTabs();
+    setupEventListeners();
+
+    // Atualizar todos os elementos da UI
+    updateUI();
+  }
+
+  function runDataMigration() {
+    let dataWasModified = false;
+
+    // Limpeza de categorias inválidas
+    const originalCategoriesCount = categories.length;
+    categories = categories.filter(cat => typeof cat === 'string' && cat.trim() !== '' && cat !== '[object Object]');
+    if (categories.length !== originalCategoriesCount) dataWasModified = true;
+
+    // Migração de contas para novo modelo com `initialBalance`
+    accounts.forEach(acc => {
+      if (!acc.hasOwnProperty('initialBalance')) {
+        const creationTransaction = transactions.find(t => t.type === 'criacao_conta' && t.toAccount == acc.id);
+        acc.initialBalance = creationTransaction ? creationTransaction.amount : (acc.balance || 0);
+        acc.balance = acc.initialBalance; // Define o saldo atual para o inicial antes de recalcular
+        dataWasModified = true;
+      }
+    });
+
+    // Remove transações do tipo 'criacao_conta' que agora são obsoletas
+    const originalTransactionsCount = transactions.length;
+    transactions = transactions.filter(t => t.type !== 'criacao_conta');
+    if (transactions.length !== originalTransactionsCount) dataWasModified = true;
+    
+    // Migração de transações para o sistema de status
+    transactions.forEach(t => {
+      if (!t.hasOwnProperty('status')) {
+        t.status = 'confirmada'; // Assume que transações antigas já foram confirmadas
+        dataWasModified = true;
+      }
+    });
+
+    // Migração de metas para garantir `currentAmount`
+    goals.forEach(g => {
+        if (!g.hasOwnProperty('currentAmount')) {
+            g.currentAmount = 0; // Garante que a propriedade exista
+            dataWasModified = true;
+        }
+    });
+
+    if (dataWasModified) {
+      console.log("Dados migrados para o novo formato.");
+      saveData();
+    }
+  }
+
+  function setupTabs() {
+    const tabs = document.querySelectorAll('.sidebar nav button');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const targetTabContent = document.getElementById(tab.dataset.tab + '-content');
+        if (targetTabContent) {
+            targetTabContent.classList.add('active');
+            updateAllCharts();
+        }
+      });
+    });
+  }
+
+  function setupEventListeners() {
+    // Botão de atualizar
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        updateUI();
+        alert('Dados atualizados com sucesso!');
+      });
+    }
+    
+    // Botões para nova transação
+    if (newTransactionBtn) {
+      newTransactionBtn.addEventListener('click', () => {
+        transactionModal.style.display = 'flex';
+      });
+    }
+
+    if(addReceitaBtn) {
+        addReceitaBtn.addEventListener('click', () => {
+            transactionType.value = 'receita';
+            transactionType.dispatchEvent(new Event('change'));
+            transactionModal.style.display = 'flex';
+        });
+    }
+
+    if(addDespesaBtn) {
+        addDespesaBtn.addEventListener('click', () => {
+            transactionType.value = 'despesa';
+            transactionType.dispatchEvent(new Event('change'));
+            transactionModal.style.display = 'flex';
+        });
+    }
+
+    // Event listeners para o modal de nova transação
+    if (closeTransactionModal) {
+      closeTransactionModal.addEventListener('click', () => {
+        transactionModal.style.display = 'none';
+      });
+    }
+    
+    if (cancelTransactionBtn) {
+      cancelTransactionBtn.addEventListener('click', () => {
+        transactionModal.style.display = 'none';
+      });
+    }
+
+    // Event listeners para adicionar nova categoria
+    if (addCategoryBtn) {
+      addCategoryBtn.addEventListener('click', () => {
+        categoryModal.style.display = 'flex';
+      });
+    }
+
+    // Event listeners para modais de categoria
+    document.getElementById('close-category-modal').addEventListener('click', () => {
+      categoryModal.style.display = 'none';
+    });
+    document.getElementById('cancel-category').addEventListener('click', () => {
+      categoryModal.style.display = 'none';
+    });
+
+    // Formulário de nova categoria
+    document.getElementById('new-category-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const categoryName = document.getElementById('new-category-name').value.trim();
+      if (categoryName && !categories.includes(categoryName)) {
+        categories.push(categoryName);
+        localStorage.setItem('categories', JSON.stringify(categories));
+        updateCategoriesList();
+        categoryModal.style.display = 'none';
+        document.getElementById('new-category-name').value = '';
+      }
+    });
+
+    // Event listeners para o card de saldo
+    document.querySelector('.summary-card.saldo .value').addEventListener('click', () => {
+      const modalBody = document.getElementById('saldo-modal-body');
+      modalBody.innerHTML = '';
+      
+      accounts.forEach(acc => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${acc.name}</td>
+          <td>${acc.type}</td>
+          <td class="${acc.balance >= 0 ? 'positive' : 'negative'}">${formatCurrency(acc.balance)}</td>
+        `;
+        modalBody.appendChild(row);
+      });
+      
+      saldoModal.style.display = 'flex';
+    });
+
+    document.getElementById('close-saldo-modal').addEventListener('click', () => {
+      saldoModal.style.display = 'none';
+    });
+
+    // Event listeners para os cards de receitas e despesas
+    document.querySelector('.summary-card.receita .value').addEventListener('click', () => {
+      document.querySelector('[data-tab="transacoes"]').click();
+      filterType.value = 'receita';
+      filterType.dispatchEvent(new Event('change'));
+    });
+
+    document.querySelector('.summary-card.despesa .value').addEventListener('click', () => {
+      document.querySelector('[data-tab="transacoes"]').click();
+      filterType.value = 'despesa';
+      filterType.dispatchEvent(new Event('change'));
+    });
+
+    // Limpar filtros
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener('click', () => {
+        filterPeriod.value = 'all';
+        customDates.style.display = 'none';
+        filterCategory.value = '';
+        filterType.value = 'all';
+        updateTransactionsTable();
+      });
+    }
+
+    // Verificações para garantir que os elementos existem antes de adicionar event listeners
+    if (transactionType) {
+        transactionType.addEventListener('change', function () {
+            const val = this.value;
+            fromAccountGroup.style.display = 'none';
+            toAccountGroup.style.display = 'block';
+            metaGroup.style.display = 'none';
+            cartaoGroup.style.display = 'none';
+            recorrenteGroup.style.display = 'none';
+            transactionCategory.required = true;
+
+            if (val === 'transferencia') {
+                fromAccountGroup.style.display = 'block';
+                toAccountGroup.style.display = 'block';
+                transactionCategory.required = false;
+            } else if (val === 'transferencia-meta') {
+                fromAccountGroup.style.display = 'block';
+                metaGroup.style.display = 'block';
+                toAccountGroup.style.display = 'none';
+                transactionCategory.required = false;
+            } else if (val === 'compra-cartao') {
+                cartaoGroup.style.display = 'block';
+                toAccountGroup.style.display = 'none';
+                recorrenteGroup.style.display = 'block';
+            } else if (val === 'receita' || val === 'despesa') {
+                recorrenteGroup.style.display = 'block';
+                toAccountGroup.style.display = 'block';
+            }
+        });
+    }
+
+    // Event listeners para o formulário de NOVA transação
+    if (isRecorrente) {
+        isRecorrente.addEventListener('change', function () {
+            recorrenteExtra.style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                isFixa.checked = false;
+                isParcelada.checked = false;
+                parceladaExtra.style.display = 'none';
+            }
+        });
+    }
+    if (isFixa) {
+        isFixa.addEventListener('change', function () {
+            if (this.checked) {
+                isRecorrente.checked = false;
+                recorrenteExtra.style.display = 'none';
+                isParcelada.checked = false;
+                parceladaExtra.style.display = 'none';
+            }
+        });
+    }
+    if (isParcelada) {
+        isParcelada.addEventListener('change', function () {
+            parceladaExtra.style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                isFixa.checked = false;
+                isRecorrente.checked = false;
+                recorrenteExtra.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listeners para o MODAL de edição de transação
+    if (editTransactionType) {
+        editTransactionType.addEventListener('change', function() {
+            const val = this.value;
+            editFromAccountGroup.style.display = 'none';
+            editToAccountGroup.style.display = 'block';
+            editMetaGroup.style.display = 'none';
+            editCartaoGroup.style.display = 'none';
+            editRecorrenteGroup.style.display = 'none';
+            editTransactionCategory.required = true;
+
+            if (val === 'transferencia') {
+                editFromAccountGroup.style.display = 'block';
+                editToAccountGroup.style.display = 'block';
+                editTransactionCategory.required = false;
+            } else if (val === 'transferencia-meta') {
+                editFromAccountGroup.style.display = 'block';
+                editMetaGroup.style.display = 'block';
+                editToAccountGroup.style.display = 'none';
+                editTransactionCategory.required = false;
+            } else if (val === 'compra-cartao') {
+                editCartaoGroup.style.display = 'block';
+                editToAccountGroup.style.display = 'none';
+                editRecorrenteGroup.style.display = 'block';
+            } else if (val === 'receita' || val === 'despesa') {
+                editRecorrenteGroup.style.display = 'block';
+            }
+        });
+    }
+    if (editIsRecorrente) {
+        editIsRecorrente.addEventListener('change', function() {
+            editRecorrenteExtra.style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                editIsFixa.checked = false;
+                editIsParcelada.checked = false;
+                editParceladaExtra.style.display = 'none';
+            }
+        });
+    }
+    if (editIsFixa) {
+        editIsFixa.addEventListener('change', function() {
+            if (this.checked) {
+                editIsRecorrente.checked = false;
+                editRecorrenteExtra.style.display = 'none';
+                editIsParcelada.checked = false;
+                editParceladaExtra.style.display = 'none';
+            }
+        });
+    }
+    if (editIsParcelada) {
+        editIsParcelada.addEventListener('change', function() {
+            editParceladaExtra.style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                editIsFixa.checked = false;
+                editIsRecorrente.checked = false;
+                editRecorrenteExtra.style.display = 'none';
+            }
+        });
+    }
+
+    if (filterPeriod) filterPeriod.addEventListener('change', function () {
+      customDates.style.display = this.value === 'custom' ? 'block' : 'none';
+      updateTransactionsTable();
+    });
+    if (document.getElementById('start-date')) document.getElementById('start-date').addEventListener('change', updateTransactionsTable);
+    if (document.getElementById('end-date')) document.getElementById('end-date').addEventListener('change', updateTransactionsTable);
+    if (document.getElementById('forecast-months')) document.getElementById('forecast-months').addEventListener('change', updateForecastChart);
+    
+    if (filterCategory) filterCategory.addEventListener('input', updateTransactionsTable);
+    if (filterType) filterType.addEventListener('change', updateTransactionsTable);
+
+    // Formulários
+    if (transactionForm) transactionForm.addEventListener('submit', handleTransactionSubmit);
+    if (accountForm) accountForm.addEventListener('submit', handleAccountSubmit);
+    if (goalForm) goalForm.addEventListener('submit', handleGoalSubmit);
+    if (ccForm) ccForm.addEventListener('submit', handleCreditCardSubmit);
+    if (ccPurchaseForm) ccPurchaseForm.addEventListener('submit', handleCCPurchaseSubmit);
+    if (editTransactionForm) editTransactionForm.addEventListener('submit', handleEditTransactionSubmit);
+    if (editAccountForm) editAccountForm.addEventListener('submit', handleEditAccountSubmit);
+    if (editGoalForm) editGoalForm.addEventListener('submit', handleEditGoalSubmit);
+    if (adjustBalanceForm) adjustBalanceForm.addEventListener('submit', handleBalanceAdjustment);
+
+    if (sidebarToggle) sidebarToggle.addEventListener('click', function () {
+      sidebar.classList.toggle('collapsed');
+    });
+
+    // Fechar modais
+    document.querySelectorAll('.modal .close-button, .modal .btn-secondary').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            el.closest('.modal').style.display = 'none';
+        });
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+    
+    // Calculator Listeners
+    document.querySelectorAll('.calculator-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            openCalculator(trigger.dataset.target);
+        });
+    });
+    
+    calculatorModal.querySelector('.close-button').addEventListener('click', () => {
+        calculatorModal.style.display = 'none';
+    });
+
+    if (document.getElementById('export-backup-btn')) document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
+    if (document.getElementById('import-backup-btn')) document.getElementById('import-backup-btn').addEventListener('click', importBackup);
+  }
+
+  // --- Funções Auxiliares ---
+  function formatCurrency(value) {
+    if (typeof value !== 'number') return 'R$ 0,00';
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('pt-BR');
+    } catch (e) {
+        console.error("Erro ao formatar data:", dateStr, e);
+        return dateStr;
+    }
+  }
+
+  function addMonthsToDate(dateString, months) {
+    const date = new Date(dateString + 'T00:00:00');
+    date.setMonth(date.getMonth() + months);
+    return date.toISOString().split('T')[0];
+  }
+
+  function saveData() {
+    localStorage.setItem('accounts', JSON.stringify(accounts));
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    localStorage.setItem('goals', JSON.stringify(goals));
+    localStorage.setItem('creditcards', JSON.stringify(creditcards));
+    localStorage.setItem('ccpurchases', JSON.stringify(ccpurchases));
+    localStorage.setItem('categories', JSON.stringify(categories));
+  }
+  
+  function recalculateAllBalances() {
+    // 1. Resetar o saldo de todas as contas para o saldo inicial.
+    accounts.forEach(acc => {
+        acc.balance = acc.initialBalance || 0;
+    });
+    
+    // 2. Resetar o valor atual de todas as metas.
+    goals.forEach(g => {
+        g.currentAmount = 0;
+    });
+
+    // 3. Processar apenas transações confirmadas para recalcular os saldos.
+    transactions.filter(t => t.status === 'confirmada').forEach(t => {
+        const amount = parseFloat(t.amount);
+        if (isNaN(amount)) return;
+
+        switch (t.type) {
+            case 'receita':
+                const toAccReceita = accounts.find(a => a.id === parseInt(t.toAccount));
+                if (toAccReceita) toAccReceita.balance += amount;
+                break;
+            case 'despesa':
+                const fromAccDespesa = accounts.find(a => a.id === parseInt(t.toAccount)); // Em despesa, toAccount é de onde sai
+                if (fromAccDespesa) fromAccDespesa.balance -= amount;
+                break;
+            case 'transferencia':
+                const fromAcc = accounts.find(a => a.id === parseInt(t.fromAccount));
+                const toAcc = accounts.find(a => a.id === parseInt(t.toAccount));
+                if (fromAcc) fromAcc.balance -= amount;
+                if (toAcc) toAcc.balance += amount;
+                break;
+            case 'transferencia-meta':
+                const fromAccMeta = accounts.find(a => a.id === parseInt(t.fromAccount));
+                const toGoal = goals.find(g => g.id === parseInt(t.metaId));
+                if (fromAccMeta) fromAccMeta.balance -= amount;
+                if (toGoal) toGoal.currentAmount += amount;
+                break;
+            // 'compra-cartao' não afeta o saldo da conta diretamente, apenas a fatura do cartão.
+        }
+    });
+  }
+
+  
+  function updateAccountSelections() {
+    const allAccounts = accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+
+    if (fromAccount) fromAccount.innerHTML = '<option value="">Selecione...</option>' + allAccounts;
+    if (toAccount) toAccount.innerHTML = '<option value="">Selecione...</option>' + allAccounts;
+    if (editFromAccount) editFromAccount.innerHTML = '<option value="">Selecione...</option>' + allAccounts;
+    if (editToAccount) editToAccount.innerHTML = '<option value="">Selecione...</option>' + allAccounts;
+  }
+
+  function updateMetaSelections() {
+    const allGoals = goals.map(goal => `<option value="${goal.id}">${goal.name}</option>`).join('');
+    if (metaSelect) metaSelect.innerHTML = '<option value="">Selecione...</option>' + allGoals;
+    if (editMetaSelect) editMetaSelect.innerHTML = '<option value="">Selecione...</option>' + allGoals;
+  }
+
+  function updateCreditCardSelections() {
+    const allCards = creditcards.map(card => `<option value="${card.id}">${card.name}</option>`).join('');
+    if (ccPurchaseCard) ccPurchaseCard.innerHTML = '<option value="">Selecione...</option>' + allCards;
+    if (cartaoSelect) cartaoSelect.innerHTML = '<option value="">Selecione...</option>' + allCards;
+    if (editCartaoSelect) editCartaoSelect.innerHTML = '<option value="">Selecione...</option>' + allCards;
+  }
+
+  function updateCategoriesList() {
+    const categoriesDataList = document.getElementById('categories-list');
+    if (categoriesDataList) {
+      categoriesDataList.innerHTML = categories.map(cat => `<option value="${cat}">`).join('');
+    }
+  }
+
+  function updateDashboard() {
+    let totalReceitas = 0;
+    let totalDespesas = 0;
+    
+    let saldoTotal = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Calcula valores confirmados este mês
+    const confirmedTransactions = transactions.filter(t => t.status === 'confirmada');
+    
+    confirmedTransactions.forEach(t => {
+        const transactionDate = new Date(t.date + 'T00:00:00');
+        if (transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear) {
+          if (t.type === 'receita') {
+            totalReceitas += parseFloat(t.amount);
+          } else if (t.type === 'despesa' || t.type === 'compra-cartao') {
+            totalDespesas += parseFloat(t.amount);
+          }
+        }
+    });
+
+    // Calcula previsão para o resto do mês com base nas transações pendentes
+    let totalReceitasPrevisto = totalReceitas;
+    let totalDespesasPrevisto = totalDespesas;
+    
+    transactions.filter(t => t.status === 'pendente').forEach(t => {
+        const transactionDate = new Date(t.date + 'T00:00:00');
+        if (transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear) {
+            if (t.type === 'receita') {
+                totalReceitasPrevisto += parseFloat(t.amount);
+            } else if (t.type === 'despesa' || t.type === 'compra-cartao') {
+                totalDespesasPrevisto += parseFloat(t.amount);
+            }
+        }
+    });
+
+    // Atualizar os cards
+    if (document.getElementById('total-receitas')) {
+        document.getElementById('total-receitas').textContent = formatCurrency(totalReceitas);
+        document.getElementById('receita-forecast').textContent = `Previsão do mês: ${formatCurrency(totalReceitasPrevisto)}`;
+    }
+    
+    if (document.getElementById('total-despesas')) {
+        document.getElementById('total-despesas').textContent = formatCurrency(totalDespesas);
+        document.getElementById('despesa-forecast').textContent = `Previsão do mês: ${formatCurrency(totalDespesasPrevisto)}`;
+    }
+    
+    if (document.getElementById('saldo-total')) {
+        document.getElementById('saldo-total').textContent = formatCurrency(saldoTotal);
+        const saldoPrevisto = saldoTotal + (totalReceitasPrevisto - totalReceitas) - (totalDespesasPrevisto - totalDespesas);
+        document.getElementById('saldo-forecast').textContent = `Previsão fim do mês: ${formatCurrency(saldoPrevisto)}`;
+    }
+
+    updateRecentTransactions();
+  }
+
+  function updateRecentTransactions() {
+    const tableBody = document.querySelector('#recent-transactions tbody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    const recent = transactions
+      .filter(t => t.status === 'confirmada')
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 5);
+
+    if (recent.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="4">Nenhuma transação recente confirmada.</td></tr>';
+      return;
+    }
+
+    recent.forEach(t => {
+      const row = tableBody.insertRow();
+      row.insertCell().textContent = t.description;
+      row.insertCell().textContent = t.category || 'N/A';
+      row.insertCell().textContent = formatDate(t.date);
+      const valueCell = row.insertCell();
+      valueCell.textContent = formatCurrency(t.amount);
+      valueCell.classList.add(t.type === 'despesa' || t.type === 'compra-cartao' ? 'negative' : 'positive');
+    });
+  }
+
+  function updateTransactionsTable() {
+    const tableBody = document.querySelector('#all-transactions tbody');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let filteredTransactions = [...transactions];
+
+    const period = filterPeriod ? filterPeriod.value : 'all';
+    const startDateInput = document.getElementById('start-date');
+    const endDateInput = document.getElementById('end-date');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (period !== 'all') {
+        filteredTransactions = filteredTransactions.filter(t => {
+            const d = new Date(t.date + 'T00:00:00');
+            d.setHours(0, 0, 0, 0);
+    
+            if (period === 'current_month') {
+                return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+            } else if (period === 'current_year') {
+                return d.getFullYear() === today.getFullYear();
+            } else if (period === 'past_months') {
+                return d < today;
+            } else if (period === 'future_months') {
+                return d > today;
+            } else if (period === 'custom' && startDateInput && endDateInput && startDateInput.value && endDateInput.value) {
+                const customStartDate = new Date(startDateInput.value + 'T00:00:00');
+                const customEndDate = new Date(endDateInput.value + 'T00:00:00');
+                return d >= customStartDate && d <= customEndDate;
+            }
+            return true;
+        });
+    }
+
+    // Aplicar filtro de categoria
+    const filterCategoryValue = filterCategory ? filterCategory.value.toLowerCase() : '';
+    if (filterCategoryValue) {
+      filteredTransactions = filteredTransactions.filter(t => t.category && t.category.toLowerCase().includes(filterCategoryValue));
+    }
+
+    // Aplicar filtro de tipo
+    const filterTypeValue = filterType ? filterType.value : 'all';
+    if (filterTypeValue !== 'all') {
+        filteredTransactions = filteredTransactions.filter(t => t.type === filterTypeValue);
+    }
+
+    if (filteredTransactions.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7">Nenhuma transação encontrada para os filtros selecionados.</td></tr>';
+      return;
+    }
+
+    filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    filteredTransactions.forEach(t => {
+      const row = tableBody.insertRow();
+      row.insertCell().textContent = formatDate(t.date);
+      row.insertCell().textContent = t.description;
+      
+      const categoryCell = row.insertCell();
+      categoryCell.innerHTML = `<span class="category-badge">${t.category || 'N/A'}</span>`;
+      
+      const valueCell = row.insertCell();
+      valueCell.textContent = formatCurrency(t.amount);
+      valueCell.classList.add(t.type === 'despesa' || t.type === 'compra-cartao' ? 'negative' : 'positive');
+      
+      const statusCell = row.insertCell();
+      const isConfirmed = t.status === 'confirmada';
+      statusCell.textContent = isConfirmed ? 'Confirmada' : 'Pendente';
+      statusCell.style.color = isConfirmed ? 'var(--success)' : 'var(--warning)';
+
+      let recorrenciaText = 'Não';
+      if (t.recorrencia) {
+        if (t.recorrencia.tipo === 'fixa') {
+            recorrenciaText = 'Fixa Mensal';
+        } else if (t.recorrencia.tipo === 'recorrente') {
+            recorrenciaText = `Recorrente (a cada ${t.recorrencia.intervalo} meses)`;
+        } else if (t.recorrencia.tipo === 'parcela') {
+            recorrenciaText = `Parcela ${t.recorrencia.atual}/${t.recorrencia.total}`;
+        }
+      }
+      row.insertCell().textContent = recorrenciaText;
+
+      const actionsCell = row.insertCell();
+      actionsCell.style.display = 'flex';
+      actionsCell.style.gap = '5px';
+      actionsCell.style.flexWrap = 'wrap';
+
+      const editBtn = document.createElement('button');
+      editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+      editBtn.title = 'Editar';
+      editBtn.classList.add('btn', 'btn-secondary', 'btn-sm');
+      editBtn.onclick = () => window.editTransaction(t.id);
+      actionsCell.appendChild(editBtn);
+
+      if (!isConfirmed) {
+        const payBtn = document.createElement('button');
+        payBtn.innerHTML = '<i class="fas fa-check"></i>';
+        payBtn.title = 'Efetivar Agora';
+        payBtn.classList.add('btn', 'btn-success', 'btn-sm');
+        payBtn.onclick = () => window.markTransactionAsPaid(t.id);
+        actionsCell.appendChild(payBtn);
+      }
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      deleteBtn.title = 'Excluir';
+      deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+      deleteBtn.onclick = () => window.deleteTransaction(t.id);
+      actionsCell.appendChild(deleteBtn);
+    });
+  }
+
+  function updateAccountsTable() {
+    const tableBody = document.querySelector('#accounts-list tbody');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    if (accounts.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="4">Nenhuma conta cadastrada.</td></tr>';
+      return;
+    }
+    accounts.forEach(acc => {
+      const row = tableBody.insertRow();
+      row.insertCell().textContent = acc.name;
+      row.insertCell().textContent = acc.type;
+      const balanceCell = row.insertCell();
+      balanceCell.textContent = formatCurrency(acc.balance);
+      balanceCell.classList.add(acc.balance >= 0 ? 'positive' : 'negative');
+
+      const actionsCell = row.insertCell();
+      actionsCell.style.display = 'flex';
+      actionsCell.style.gap = '5px';
+      actionsCell.style.flexWrap = 'wrap';
+
+      const adjustBtn = document.createElement('button');
+      adjustBtn.textContent = 'Ajustar Saldo';
+      adjustBtn.classList.add('btn', 'btn-warning', 'btn-sm');
+      adjustBtn.onclick = () => window.adjustBalance(acc.id);
+      actionsCell.appendChild(adjustBtn);
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Editar';
+      editBtn.classList.add('btn', 'btn-secondary', 'btn-sm');
+      editBtn.onclick = () => window.editAccount(acc.id);
+      actionsCell.appendChild(editBtn);
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Excluir';
+      deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+      deleteBtn.onclick = () => window.deleteAccount(acc.id);
+      actionsCell.appendChild(deleteBtn);
+    });
+  }
+
+  function updateGoalsList() {
+    const goalsListDiv = document.getElementById('goals-list');
+    if (!goalsListDiv) return;
+    goalsListDiv.innerHTML = '';
+    if (goals.length === 0) {
+      goalsListDiv.innerHTML = '<p>Nenhuma meta cadastrada.</p>';
+      return;
+    }
+    goals.forEach(goal => {
+      const progress = (goal.currentAmount / goal.targetAmount) * 100;
+      const daysLeft = Math.ceil((new Date(goal.targetDate + 'T00:00:00') - new Date()) / (1000 * 60 * 60 * 24));
+      const goalDiv = document.createElement('div');
+      goalDiv.classList.add('card');
+      goalDiv.innerHTML = `
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>${goal.name}</h3>
+            <div style="display:flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" onclick="window.editGoal(${goal.id})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="window.deleteGoal(${goal.id})">Excluir</button>
+            </div>
+        </div>
+        <p>Objetivo: ${formatCurrency(goal.targetAmount)} | Saldo Atual: ${formatCurrency(goal.currentAmount)}</p>
+        <div class="progress-bar">
+          <div class="progress" style="width: ${Math.min(100, progress)}%;">
+            ${Math.round(progress)}%
+          </div>
+        </div>
+        <p>${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Data limite atingida/passada'}</p>
+      `;
+      goalsListDiv.appendChild(goalDiv);
+    });
+  }
+
+  function getCardCurrentInvoice(cardId) {
+    const card = creditcards.find(c => c.id === cardId);
+    if (!card) return 0;
+
+    let invoiceTotal = 0;
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    let invoiceStartDate, invoiceEndDate;
+
+    if (currentDay > card.closing) {
+        invoiceStartDate = new Date(currentYear, currentMonth, card.closing + 1);
+        invoiceEndDate = new Date(currentYear, currentMonth + 1, card.closing);
+    } else {
+        invoiceStartDate = new Date(currentYear, currentMonth - 1, card.closing + 1);
+        invoiceEndDate = new Date(currentYear, currentMonth, card.closing);
+    }
+    
+    invoiceStartDate.setHours(0, 0, 0, 0);
+    invoiceEndDate.setHours(0, 0, 0, 0);
+    
+    ccpurchases.filter(p => parseInt(p.cardId) === cardId).forEach(purchase => {
+        const purchaseDate = new Date(purchase.date + 'T00:00:00');
+        if (purchaseDate >= invoiceStartDate && purchaseDate <= invoiceEndDate) {
+            invoiceTotal += purchase.value;
+        }
+    });
+    return invoiceTotal;
+  }
+
+  function getBestPurchaseDay(closingDay) {
+      const bestDay = new Date();
+      bestDay.setDate(closingDay + 1);
+      return formatDate(bestDay.toISOString().split('T')[0]);
+  }
+
+  function updateCreditCardsTable() {
+    const tableBody = document.querySelector('#creditcards-list tbody');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    if (creditcards.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="6">Nenhum cartão de crédito cadastrado.</td></tr>';
+      return;
+    }
+    creditcards.forEach(card => {
+      const currentInvoice = getCardCurrentInvoice(card.id);
+      const availableLimit = card.limit - currentInvoice;
+      const bestDay = getBestPurchaseDay(card.closing);
+
+      const row = tableBody.insertRow();
+      row.insertCell().textContent = card.name;
+      row.insertCell().textContent = formatCurrency(card.limit);
+      const availableLimitCell = row.insertCell();
+      availableLimitCell.textContent = formatCurrency(availableLimit);
+      availableLimitCell.classList.add(availableLimit >= 0 ? 'positive' : 'negative');
+      const invoiceCell = row.insertCell();
+      invoiceCell.textContent = formatCurrency(currentInvoice);
+      invoiceCell.classList.add(currentInvoice > 0 ? 'negative' : 'positive');
+      row.insertCell().textContent = bestDay;
+
+      const actionsCell = row.insertCell();
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Excluir';
+      deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+      deleteBtn.onclick = () => window.deleteCreditCard(card.id);
+      actionsCell.appendChild(deleteBtn);
+    });
+  }
+
+  function updateCCPurchases() {
+    const listDiv = document.getElementById('cc-purchases-list');
+    if (!listDiv) return;
+    listDiv.innerHTML = '';
+    if (ccpurchases.length === 0) {
+      listDiv.innerHTML = '<p>Nenhuma compra registrada em cartão de crédito.</p>';
+      return;
+    }
+
+    const purchasesByCard = creditcards.map(card => ({
+        card: card,
+        purchases: ccpurchases.filter(p => parseInt(p.cardId) === card.id).sort((a,b) => new Date(b.date) - new Date(a.date))
+    }));
+
+    purchasesByCard.forEach(({ card, purchases }) => {
+        if (purchases.length === 0) return;
+
+        const cardSection = document.createElement('div');
+        cardSection.classList.add('card');
+        cardSection.innerHTML = `<h3>Compras em ${card.name}</h3>`;
+
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        purchases.forEach(p => {
+            const row = tbody.insertRow();
+            row.insertCell().textContent = formatDate(p.date);
+            row.insertCell().textContent = p.desc;
+            row.insertCell().textContent = formatCurrency(p.value);
+            
+            const actionsCell = row.insertCell();
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Excluir';
+            deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+            deleteBtn.onclick = () => window.deleteCCPurchase(p.id);
+            actionsCell.appendChild(deleteBtn);
+        });
+        cardSection.appendChild(table);
+        listDiv.appendChild(cardSection);
+    });
+  }
+
+  function updateAlertVencimento() {
+    const alertDiv = document.getElementById('alert-vencimento');
+    if (!alertDiv) return;
+    alertDiv.innerHTML = '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let hasAlert = false;
+
+    creditcards.forEach(card => {
+        let dueDate = new Date(today.getFullYear(), today.getMonth(), card.due);
+        if (dueDate < today) {
+            dueDate.setMonth(dueDate.getMonth() + 1);
+        }
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const currentInvoiceValue = getCardCurrentInvoice(card.id);
+
+        if (diffDays <= 7 && diffDays >= 0 && currentInvoiceValue > 0) {
+            const alertMessage = document.createElement('div');
+            alertMessage.classList.add('alert-vencimento');
+            alertMessage.innerHTML = `<span>⚠️</span> A fatura do cartão <strong>${card.name}</strong> vence em <strong>${diffDays} dia(s)</strong>! Valor atual: <strong>${formatCurrency(currentInvoiceValue)}</strong>`;
+            alertDiv.appendChild(alertMessage);
+            hasAlert = true;
+        }
+    });
+
+    if (!hasAlert) {
+        alertDiv.style.display = 'none';
+    } else {
+        alertDiv.style.display = 'block';
+    }
+  }
+
+  // --- Funções para Gráficos ---
+
+  function updateAllCharts() {
+    if(!document.getElementById('dashboard-content').classList.contains('active')) return;
+    updateOverviewChart();
+    updateMonthlyReportChart();
+    updateAnnualReportChart();
+    updateCategoryReportChart();
+    updateForecastChart();
+  }
+
+  function updateOverviewChart() {
+    const ctx = document.getElementById('overview-chart')?.getContext('2d');
+    if (!ctx) return;
+    if (overviewChart) overviewChart.destroy();
+
+    const confirmedTransactions = transactions.filter(t => t.status === 'confirmada');
+    
+    const data = {};
+    confirmedTransactions.forEach(t => {
+        if (t.type === 'receita' || t.type === 'despesa' || t.type === 'compra-cartao') {
+            const category = t.category || 'Outros';
+            if (!data[category]) data[category] = { receita: 0, despesa: 0 };
+            if (t.type === 'receita') data[category].receita += t.amount;
+            else data[category].despesa += t.amount;
+        }
+    });
+
+    const labels = Object.keys(data);
+    const receitas = labels.map(l => data[l].receita);
+    const despesas = labels.map(l => data[l].despesa);
+
+    overviewChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Receitas',
+            data: receitas,
+            backgroundColor: 'rgba(46, 204, 113, 0.6)',
+          },
+          {
+            label: 'Despesas',
+            data: despesas,
+            backgroundColor: 'rgba(247, 37, 133, 0.6)',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
+
+  function updateMonthlyReportChart() {
+    const ctx = document.getElementById('monthly-report-chart')?.getContext('2d');
+    if (!ctx) return;
+    if (monthlyReportChart) monthlyReportChart.destroy();
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const confirmedTransactions = transactions.filter(t => {
+        const d = new Date(t.date + 'T00:00:00');
+        return t.status === 'confirmada' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const data = { receitas: 0, despesas: 0 };
+    confirmedTransactions.forEach(t => {
+        if (t.type === 'receita') data.receitas += t.amount;
+        if (t.type === 'despesa' || t.type === 'compra-cartao') data.despesas += t.amount;
+    });
+
+    monthlyReportChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Receitas', 'Despesas'],
+            datasets: [{
+                data: [data.receitas, data.despesas],
+                backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(247, 37, 133, 0.8)']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function updateAnnualReportChart() {
+    const ctx = document.getElementById('annual-report-chart')?.getContext('2d');
+    if (!ctx) return;
+    if (annualReportChart) annualReportChart.destroy();
+    
+    const monthlyData = Array(12).fill(0).map(() => ({ revenues: 0, expenses: 0 }));
+    const confirmedTransactions = transactions.filter(t => t.status === 'confirmada');
+
+    confirmedTransactions.forEach(t => {
+      const month = new Date(t.date + 'T00:00:00').getMonth();
+      if (t.type === 'receita') monthlyData[month].revenues += t.amount;
+      if (t.type === 'despesa' || t.type === 'compra-cartao') monthlyData[month].expenses += t.amount;
+    });
+
+    annualReportChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        datasets: [
+          { label: 'Receitas', data: monthlyData.map(d => d.revenues), borderColor: 'rgba(46, 204, 113, 1)', fill: false },
+          { label: 'Despesas', data: monthlyData.map(d => d.expenses), borderColor: 'rgba(247, 37, 133, 1)', fill: false }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function updateCategoryReportChart() {
+    const ctx = document.getElementById('category-report-chart')?.getContext('2d');
+    if (!ctx) return;
+    if (categoryReportChart) categoryReportChart.destroy();
+    
+    const categoryData = {};
+    const confirmedTransactions = transactions.filter(t => t.status === 'confirmada');
+
+    confirmedTransactions.forEach(t => {
+        if (t.type === 'despesa' || t.type === 'compra-cartao') {
+            const category = t.category || 'Outros';
+            categoryData[category] = (categoryData[category] || 0) + t.amount;
+        }
+    });
+
+    categoryReportChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(categoryData),
+        datasets: [{
+            data: Object.values(categoryData),
+            backgroundColor: ['#f72585', '#b5179e', '#7209b7', '#560bad', '#480ca8', '#3a0ca3', '#3f37c9', '#4361ee', '#4895ef', '#4cc9f0']
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function updateForecastChart() {
+    const ctx = document.getElementById('forecast-chart')?.getContext('2d');
+    if (!ctx) return;
+    if (forecastChart) forecastChart.destroy();
+
+    const forecastMonths = parseInt(document.getElementById('forecast-months').value);
+    let currentBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const forecastData = [currentBalance];
+    const labels = ['Hoje'];
+    const today = new Date();
+
+    for (let i = 1; i <= forecastMonths; i++) {
+        const futureMonth = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        labels.push(futureMonth.toLocaleString('default', { month: 'short' }));
+        
+        let monthRevenue = 0;
+        let monthExpense = 0;
+        
+        transactions.filter(t => t.status === 'pendente').forEach(t => {
+            const d = new Date(t.date + 'T00:00:00');
+            if (d.getMonth() === futureMonth.getMonth() && d.getFullYear() === futureMonth.getFullYear()) {
+                if (t.type === 'receita') monthRevenue += t.amount;
+                if (t.type === 'despesa' || t.type === 'compra-cartao') monthExpense += t.amount;
+            }
+        });
+        
+        currentBalance += (monthRevenue - monthExpense);
+        forecastData.push(currentBalance);
+    }
+
+    forecastChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Previsão de Saldo (Baseado em Pendentes)',
+          data: forecastData,
+          borderColor: '#4361ee',
+          fill: true
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // --- Funções da Calculadora ---
+  function initCalculator() {
+    const keysContainer = document.querySelector('#calculator .calculator-keys');
+    const keyLayout = [
+        { text: 'C', class: 'clear', action: 'clear' },
+        { text: '(', class: 'operator', action: '(' },
+        { text: ')', class: 'operator', action: ')' },
+        { text: '/', class: 'operator', action: '/' },
+        { text: '7', action: '7' }, { text: '8', action: '8' }, { text: '9', action: '9' },
+        { text: '*', class: 'operator', action: '*' },
+        { text: '4', action: '4' }, { text: '5', action: '5' }, { text: '6', action: '6' },
+        { text: '-', class: 'operator', action: '-' },
+        { text: '1', action: '1' }, { text: '2', action: '2' }, { text: '3', action: '3' },
+        { text: '+', class: 'operator', action: '+' },
+        { text: '0', action: '0', style: 'grid-column: span 2' },
+        { text: '.', action: '.' },
+        { text: '=', class: 'equal-sign', action: 'calculate' },
+    ];
+
+    keysContainer.innerHTML = '';
+    keyLayout.forEach(keyDef => {
+        const button = document.createElement('button');
+        button.textContent = keyDef.text;
+        button.type = 'button';
+        if (keyDef.class) button.classList.add(keyDef.class);
+        if (keyDef.style) button.style.cssText = keyDef.style;
+        button.addEventListener('click', () => handleCalculatorKey(keyDef.action));
+        keysContainer.appendChild(button);
+    });
+  }
+
+  function handleCalculatorKey(action) {
+    if (action === 'clear') {
+        calculatorScreen.value = '';
+    } else if (action === 'calculate') {
+        if (calculatorTargetInput && calculatorScreen.value) {
+            const result = safeEvaluate(calculatorScreen.value);
+            if (result !== null && !isNaN(result)) {
+                calculatorTargetInput.value = result.toFixed(2);
+                calculatorModal.style.display = 'none';
+            } else {
+                alert('Expressão matemática inválida.');
+            }
+        }
+    } else {
+        calculatorScreen.value += action;
+    }
+  }
+
+  function safeEvaluate(expression) {
+    if (/[^0-9.+\-*/()\s]/.test(expression)) {
+        console.error("Caracteres inválidos na expressão.");
+        return null;
+    }
+    try {
+        return new Function('return ' + expression)();
+    } catch (error) {
+        console.error("Erro ao avaliar a expressão:", error);
+        return null;
+    }
+  }
+
+  function openCalculator(targetInputId) {
+    calculatorTargetInput = document.getElementById(targetInputId);
+    if (calculatorTargetInput) {
+        calculatorScreen.value = calculatorTargetInput.value;
+        calculatorModal.style.display = 'flex';
+    }
+  }
+
+  // --- Funções de Backup ---
+
+  function exportBackup() {
+    const data = {
+      accounts,
+      transactions,
+      goals,
+      creditcards,
+      ccpurchases,
+      categories
+    };
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `finance_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if (backupMessage) backupMessage.textContent = 'Backup exportado com sucesso!';
+    setTimeout(() => { if (backupMessage) backupMessage.textContent = ''; }, 3000);
+  }
+
+  function importBackup() {
+    const fileInput = document.getElementById('import-backup-input');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      if (backupMessage) backupMessage.textContent = 'Por favor, selecione um arquivo de backup.';
+      return;
+    }
+    const file = fileInput.files[0];
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        if (confirm('Importar backup irá sobrescrever TODOS os seus dados atuais. Deseja continuar?')) {
+          accounts = importedData.accounts || [];
+          transactions = importedData.transactions || [];
+          goals = importedData.goals || [];
+          creditcards = importedData.creditcards || [];
+          ccpurchases = importedData.ccpurchases || [];
+          categories = importedData.categories || [];
+          
+          init(); // Roda a inicialização completa, que inclui migração e recálculo
+          
+          if (backupMessage) backupMessage.textContent = 'Backup importado com sucesso!';
+        } else {
+            if (backupMessage) backupMessage.textContent = 'Importação cancelada.';
+        }
+      } catch (error) {
+        if (backupMessage) backupMessage.textContent = 'Erro ao ler o arquivo de backup. Certifique-se de que é um arquivo JSON válido.';
+        console.error('Erro de importação:', error);
+      }
+      setTimeout(() => { if (backupMessage) backupMessage.textContent = ''; }, 3000);
+    };
+    reader.readAsText(file);
+  }
+
+  // --- Handlers de Submit ---
+
+  function handleTransactionSubmit(e) {
+    e.preventDefault();
+    const type = transactionType.value;
+    const amount = parseFloat(document.getElementById('transaction-amount').value);
+    const transactionDate = document.getElementById('transaction-date').value;
+    const description = document.getElementById('transaction-description').value;
+    const category = document.getElementById('transaction-category').value;
+
+    if (!type || isNaN(amount) || !transactionDate || !description) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    // --- CORREÇÃO: Validação específica e clara por tipo de transação ---
+    if (type === 'receita' || type === 'despesa') {
+        if (!toAccount.value) {
+            alert('Para este tipo de transação, você deve selecionar uma conta.');
+            return;
+        }
+    } else if (type === 'transferencia') {
+        if (!fromAccount.value || !toAccount.value) {
+            alert('Para transferências, você deve selecionar as contas de origem e de destino.');
+            return;
+        }
+    } else if (type === 'transferencia-meta') {
+        if (!fromAccount.value) {
+            alert('Para transferir para uma meta, você deve selecionar a conta de origem.');
+            return;
+        }
+        if (!metaSelect.value) {
+            alert('Para transferir para uma meta, você deve selecionar a meta de destino.');
+            return;
+        }
+    } else if (type === 'compra-cartao') {
+        if (!cartaoSelect.value) {
+            alert('Para registrar uma compra, você deve selecionar um cartão de crédito.');
+            return;
+        }
+    }
+    
+    if (category && !categories.includes(category)) {
+      categories.push(category);
+      updateCategoriesList();
+    }
+    
+    const isParceladaChecked = isParcelada.checked;
+    const parcelas = isParceladaChecked ? parseInt(document.getElementById('parcelas-num').value) : 1;
+    const isFixaChecked = isFixa.checked;
+    const isRecorrenteChecked = isRecorrente.checked;
+
+    const baseTransaction = {
+      type: type,
+      category: category,
+      description: description,
+      status: 'pendente', // Transações sempre começam como pendentes
+      recorrencia: null
+    };
+
+    if (isFixaChecked) {
+        baseTransaction.recorrencia = { tipo: 'fixa', intervalo: 1 };
+    } else if (isRecorrenteChecked) {
+        baseTransaction.recorrencia = { tipo: 'recorrente', intervalo: parseInt(document.getElementById('recorrente-interval').value) || 1 };
+    }
+    
+    for (let i = 0; i < parcelas; i++) {
+        const installmentDate = addMonthsToDate(transactionDate, i);
+        const installmentId = Date.now() + i;
+        const installmentTransaction = {
+            ...baseTransaction,
+            id: installmentId,
+            date: installmentDate,
+            amount: parcelas > 1 ? amount / parcelas : amount,
+            description: parcelas > 1 ? `${description} (${i + 1}/${parcelas})` : description,
+        };
+
+        if (isParceladaChecked) {
+            installmentTransaction.recorrencia = { tipo: 'parcela', atual: i + 1, total: parcelas };
+        }
+
+        switch(type) {
+            case 'transferencia':
+                installmentTransaction.fromAccount = fromAccount.value;
+                installmentTransaction.toAccount = toAccount.value;
+                break;
+            case 'transferencia-meta':
+                installmentTransaction.fromAccount = fromAccount.value;
+                installmentTransaction.metaId = metaSelect.value;
+                break;
+            case 'compra-cartao':
+                installmentTransaction.cardId = cartaoSelect.value;
+                ccpurchases.push({
+                    id: installmentId,
+                    cardId: installmentTransaction.cardId,
+                    desc: installmentTransaction.description,
+                    value: installmentTransaction.amount,
+                    date: installmentDate,
+                });
+                break;
+            default: // receita, despesa
+                installmentTransaction.toAccount = toAccount.value;
+        }
+
+        transactions.push(installmentTransaction);
+    }
+
+    saveData();
+    updateUI();
+    transactionForm.reset();
+    document.getElementById('transaction-date').value = new Date().toISOString().split('T')[0];
+    transactionModal.style.display = 'none';
+    alert('Transação adicionada com sucesso. Ela está pendente e precisa ser confirmada.');
+  }
+
+  function handleAccountSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('account-name').value;
+    const type = document.getElementById('account-type').value;
+    const initialBalance = parseFloat(document.getElementById('account-balance').value);
+    
+    if (!name || isNaN(initialBalance)) {
+      alert('Por favor, preencha o nome e um saldo inicial válido.');
+      return;
+    }
+
+    accounts.push({
+        id: Date.now(),
+        name,
+        type,
+        initialBalance,
+        balance: initialBalance // O saldo atual começa igual ao inicial
+    });
+
+    saveData();
+    recalculateAllBalances();
+    updateUI();
+    accountForm.reset();
+    alert('Conta criada com sucesso.');
+  }
+
+  function handleGoalSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('goal-name').value;
+    const targetAmount = parseFloat(document.getElementById('goal-amount').value);
+    const targetDate = document.getElementById('goal-date').value;
+
+    if (!name || isNaN(targetAmount) || !targetDate) {
+      alert('Por favor, preencha todos os campos da meta.');
+      return;
+    }
+
+    goals.push({ id: Date.now(), name, targetAmount, currentAmount: 0, targetDate });
+    saveData();
+    goalForm.reset();
+    document.getElementById('goal-date').value = new Date().toISOString().split('T')[0];
+    updateUI();
+    alert('Meta adicionada com sucesso. Para progredir, faça uma "Transferência para Meta".');
+  }
+
+  function handleCreditCardSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('cc-name').value;
+    const limit = parseFloat(document.getElementById('cc-limit').value);
+    const closing = parseInt(document.getElementById('cc-closing').value);
+    const due = parseInt(document.getElementById('cc-due').value);
+    
+    if(!name || isNaN(limit) || isNaN(closing) || isNaN(due)) {
+      alert('Por favor, preencha todos os campos do cartão.');
+      return;
+    }
+
+    creditcards.push({ id: Date.now(), name, limit, closing, due });
+    saveData();
+    ccForm.reset();
+    updateUI();
+    alert('Cartão de crédito adicionado com sucesso.');
+  }
+
+  function handleCCPurchaseSubmit(e) {
+    e.preventDefault();
+    const cardId = ccPurchaseCard.value;
+    const desc = document.getElementById('cc-purchase-desc').value;
+    const value = parseFloat(document.getElementById('cc-purchase-value').value);
+    const date = document.getElementById('cc-purchase-date').value;
+    const installments = parseInt(document.getElementById('cc-purchase-installments').value);
+    const category = document.getElementById('cc-purchase-category').value;
+
+    if (!cardId || !desc || isNaN(value) || !date || isNaN(installments) || !category) {
+      alert('Por favor, preencha todos os campos da compra.');
+      return;
+    }
+
+    for (let i = 0; i < installments; i++) {
+        const installmentDate = addMonthsToDate(date, i);
+        const purchaseId = Date.now() + i;
+        const purchaseDesc = `${desc}` + (installments > 1 ? ` (${i + 1}/${installments})` : '');
+        const purchaseValue = value / installments;
+        
+        ccpurchases.push({ id: purchaseId, cardId, desc: purchaseDesc, value: purchaseValue, date: installmentDate });
+        transactions.push({
+            id: purchaseId, type: 'compra-cartao', category, amount: purchaseValue, date: installmentDate,
+            description: purchaseDesc, cardId, status: 'pendente',
+            recorrencia: { tipo: 'parcela', atual: i + 1, total: installments }
+        });
+    }
+
+    saveData();
+    ccPurchaseForm.reset();
+    document.getElementById('cc-purchase-date').value = new Date().toISOString().split('T')[0];
+    updateUI();
+    alert('Compra(s) de cartão registrada(s) com sucesso!');
+  }
+
+  function handleEditTransactionSubmit(e) {
+    e.preventDefault();
+    const id = parseFloat(editTransactionId.value);
+    
+    const index = transactions.findIndex(t => t.id === id);
+    if(index === -1) return;
+
+    transactions[index] = {
+      ...transactions[index],
+      type: editTransactionType.value,
+      amount: parseFloat(editTransactionAmount.value),
+      date: editTransactionDate.value,
+      description: editTransactionDescription.value,
+      category: editTransactionCategory.value,
+      toAccount: editToAccount.value || null,
+      fromAccount: editFromAccount.value || null,
+      metaId: editMetaSelect.value || null,
+      cardId: editCartaoSelect.value || null,
+    };
+    
+    saveData();
+    recalculateAllBalances(); // Recalcula tudo para garantir consistência
+    editModal.style.display = 'none';
+    updateUI();
+    alert('Transação atualizada com sucesso.');
+  }
+
+  function handleEditAccountSubmit(e) {
+      e.preventDefault();
+      const id = parseFloat(editAccountId.value);
+      const index = accounts.findIndex(acc => acc.id === id);
+      if(index === -1) return;
+
+      accounts[index].name = editAccountName.value;
+      accounts[index].type = editAccountType.value;
+      
+      saveData();
+      updateUI();
+      editAccountModal.style.display = 'none';
+      alert('Conta atualizada com sucesso.');
+  }
+
+  function handleEditGoalSubmit(e) {
+    e.preventDefault();
+    const id = parseFloat(editGoalId.value);
+    const index = goals.findIndex(g => g.id === id);
+    if (index === -1) return;
+
+    goals[index].name = editGoalName.value;
+    goals[index].targetAmount = parseFloat(editGoalAmount.value);
+    goals[index].targetDate = editGoalDate.value;
+
+    saveData();
+    updateUI();
+    editGoalModal.style.display = 'none';
+    alert('Meta atualizada com sucesso.');
+  }
+
+
+  function handleBalanceAdjustment(e) {
+    e.preventDefault();
+    const accountId = parseFloat(adjustAccountId.value);
+    const newBalance = parseFloat(newBalanceAmount.value);
+
+    const account = accounts.find(acc => acc.id === accountId);
+    if (!account || isNaN(newBalance)) {
+        alert("Erro ao encontrar a conta ou valor do novo saldo é inválido.");
+        return;
+    }
+    
+    const currentBalanceWithoutAdjustment = account.balance;
+    const adjustmentAmount = newBalance - currentBalanceWithoutAdjustment;
+
+    if (adjustmentAmount === 0) {
+        adjustBalanceModal.style.display = 'none';
+        return;
+    }
+
+    transactions.push({
+        id: Date.now(),
+        type: adjustmentAmount > 0 ? 'receita' : 'despesa',
+        toAccount: accountId,
+        fromAccount: null,
+        category: 'Ajuste',
+        amount: Math.abs(adjustmentAmount),
+        date: new Date().toISOString().split('T')[0],
+        description: 'Ajuste de Saldo',
+        status: 'confirmada' // O ajuste de saldo é uma ação imediata e confirmada
+    });
+    
+    saveData();
+    recalculateAllBalances(); // Recalcula imediatamente para refletir o ajuste
+    updateUI();
+    adjustBalanceModal.style.display = 'none';
+    alert('Saldo ajustado e transação de ajuste criada com sucesso!');
+  }
+
+  // --- Funções de Exclusão e Edição ---
+
+  window.deleteTransaction = function(id) {
+    if (confirm('Tem certeza que deseja excluir esta transação?')) {
+      transactions = transactions.filter(t => t.id !== id);
+      // Se a transação for uma compra de cartão, remove da lista de compras também
+      ccpurchases = ccpurchases.filter(p => p.id !== id);
+      
+      saveData();
+      recalculateAllBalances();
+      updateUI();
+    }
+  };
+
+  window.editTransaction = function(id) {
+    const t = transactions.find(t => t.id === id);
+    if (!t) return;
+
+    editTransactionId.value = t.id;
+    editTransactionType.value = t.type;
+    editTransactionAmount.value = t.amount;
+    editTransactionDate.value = t.date;
+    editTransactionDescription.value = t.description;
+    editTransactionCategory.value = t.category || '';
+    
+    editTransactionType.dispatchEvent(new Event('change'));
+
+    editToAccount.value = t.toAccount || '';
+    editFromAccount.value = t.fromAccount || '';
+    editMetaSelect.value = t.metaId || '';
+    editCartaoSelect.value = t.cardId || '';
+
+    editModal.style.display = 'flex';
+  };
+
+  window.markTransactionAsPaid = function(id) {
+    if (confirm('Deseja confirmar esta transação? Ela afetará o saldo da conta imediatamente.')) {
+      const transactionIndex = transactions.findIndex(t => t.id === id);
+      if (transactionIndex === -1) return;
+      
+      transactions[transactionIndex].status = 'confirmada';
+      transactions[transactionIndex].date = new Date().toISOString().split('T')[0]; // Data da confirmação
+
+      saveData();
+      recalculateAllBalances();
+      updateUI();
+      alert('Transação confirmada com sucesso!');
+    }
+  };
+
+  window.deleteAccount = function(id) {
+    const hasTransactions = transactions.some(t => parseInt(t.toAccount) === id || parseInt(t.fromAccount) === id);
+    if (hasTransactions) {
+        alert('Não é possível excluir esta conta pois existem transações associadas a ela. Para excluir, primeiro remova ou altere as transações vinculadas.');
+        return;
+    }
+    if (confirm('Tem certeza que deseja excluir esta conta?')) {
+      accounts = accounts.filter(a => a.id !== id);
+      saveData();
+      recalculateAllBalances();
+      updateUI();
+    }
+  };
+
+  window.editAccount = function(id) {
+      const account = accounts.find(acc => acc.id === id);
+      if (!account) return;
+      editAccountId.value = account.id;
+      editAccountName.value = account.name;
+      editAccountType.value = account.type;
+      editAccountModal.style.display = 'flex';
+  };
+
+  window.adjustBalance = function(id) {
+      const account = accounts.find(acc => acc.id === id);
+      if (!account) return;
+      adjustAccountId.value = account.id;
+      adjustBalanceTitle.textContent = `Ajustar Saldo de "${account.name}"`;
+      currentBalanceText.textContent = formatCurrency(account.balance);
+      newBalanceAmount.value = account.balance.toFixed(2);
+      adjustBalanceModal.style.display = 'flex';
+  }
+
+  window.deleteGoal = function(id) {
+    const hasTransactions = transactions.some(t => t.type === 'transferencia-meta' && parseInt(t.metaId) === id);
+    if(hasTransactions) {
+        if (!confirm('Esta meta possui transações de transferência associadas. Excluir a meta NÃO excluirá as transações (elas permanecerão no seu histórico, mas não apontarão mais para uma meta existente). Deseja continuar?')) {
+            return;
+        }
+    } else if (!confirm('Tem certeza que deseja excluir esta meta?')) {
+        return;
+    }
+    
+    goals = goals.filter(g => g.id !== id);
+    saveData();
+    updateUI();
+  };
+
+
+  window.editGoal = function(id) {
+      const goal = goals.find(g => g.id === id);
+      if (!goal) return;
+      editGoalId.value = goal.id;
+      editGoalName.value = goal.name;
+      editGoalAmount.value = goal.targetAmount;
+      editGoalDate.value = goal.targetDate;
+      editGoalModal.style.display = 'flex';
+  };
+
+  window.deleteCreditCard = function(id) {
+    const cardPurchases = ccpurchases.filter(p => parseInt(p.cardId) === id);
+    if (cardPurchases.length > 0) {
+      if (!confirm(`Este cartão possui ${cardPurchases.length} compra(s) registrada(s). Ao excluir o cartão, todas essas compras e as transações associadas serão removidas. Deseja continuar?`)) {
+        return;
+      }
+      const purchaseIds = cardPurchases.map(p => p.id);
+      ccpurchases = ccpurchases.filter(p => parseInt(p.cardId) !== id);
+      transactions = transactions.filter(t => !purchaseIds.includes(t.id));
+    }
+
+    if (creditcards.length === 1 && cardPurchases.length === 0) {
+        if (!confirm('Tem certeza que deseja excluir este cartão?')) return;
+    }
+    
+    creditcards = creditcards.filter(c => c.id !== id);
+    saveData();
+    recalculateAllBalances();
+    updateUI();
+    alert('Cartão e todas as suas compras associadas foram excluídos com sucesso.');
+  };
+
+  window.deleteCCPurchase = function(id) {
+    if (confirm('Tem certeza que deseja excluir esta compra no cartão? Isso removerá a transação pendente associada.')) {
+      ccpurchases = ccpurchases.filter(p => p.id !== id);
+      transactions = transactions.filter(t => t.id !== id);
+      saveData();
+      recalculateAllBalances();
+      updateUI();
+      alert('Compra de cartão excluída com sucesso.');
+    }
+  };
+
+  function updateUI() {
+      // O recálculo é a primeira etapa para garantir que os dados estejam corretos
+      recalculateAllBalances();
+      
+      // Agora, atualize todos os componentes da interface com os dados corretos
+      updateAccountSelections();
+      updateMetaSelections();
+      updateCreditCardSelections();
+      updateCategoriesList();
+      updateDashboard();
+      updateTransactionsTable();
+      updateAccountsTable();
+      updateGoalsList();
+      updateCreditCardsTable();
+      updateCCPurchases();
+      updateAlertVencimento();
+      updateAllCharts();
+  }
+</script>
+</body>
+</html>
